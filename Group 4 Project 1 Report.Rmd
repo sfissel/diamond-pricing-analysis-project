@@ -1,0 +1,468 @@
+---
+title: "**PROJECT 1 REPORT**"
+author: "GROUP 4: Stephanie Fissel, Jack Gallagher, Lindley Slipetz, & Will Tenpas"
+date: "July 2, 2023"
+output: 
+    html_document:
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        theme: yeti
+---
+
+## **SECTION 1: Summary of Findings**
+When purchasing diamonds, consumers take into account various factors, most commonly the four Cs: cut, clarity, color, and carat. Understanding how these factors interact with price and each other is important to make smart consumer decisions. The team evaluated a dataset with information on 1,000 diamonds from Blue Nile, an online diamond seller,  and performed statistical analysis to test consumer-facing claims that are made by Blue Nile regarding diamond pricing. 
+
+Below is a list of claims and whether or not they were found to be true or false. 
+
+**CLAIM 1:**
+Blue Nile’s claim that cut is a very important factor to price is not upheld. While there is a slight increase in price with an improvement in cut, the cut is not nearly as important to the price as Blue Nile states. When only looking at more expensive diamonds, an improvement of cut more clearly results in a price increase.
+
+**CLAIM 2:**
+Blue Nile’s claim that an improvement in clarity leads to an increase in price is not upheld. The median values for each category are almost identical, and there is no distinguishable trend among the clarity data (excluding flawless clarity, which has so few data points it cannot be reasonably analyzed).
+
+**CLAIM 3:**
+Blue Nile’s claim that an improvement in colorlessness leads to an increase in price is not upheld. The medians for the color categories are almost identical, and while more expensive diamonds’ prices increase slightly when more colorless, it is not strong enough to support Blue Nile’s claim.
+
+**CLAIM 4:**
+Blue Nile’s claim that the higher the carat is the higher the price is is upheld. There is a strongly related increase in price with an increase in diamond carat: for a 1% increase in carat there is a 3.9% increase in price.
+
+**CLAIM 5:**
+Blue Nile’s claim that the type of cut affects price more than the level of clarity is upheld. There is a stronger association between cut and price versus clarity in price when plotted together as the clarity types among the cuts are inconsistent with price levels.
+
+**CLAIM 6:**
+Blue Nile’s claim that there is a relationship between the cut of the diamond and the color is not upheld. There is not a noticeable difference in proportion of higher quality cuts as you move into the more desirable color range.
+
+**CLAIM 7:**
+Blue Nile’s claim that the higher the cut, the higher the clarity is not upheld. The highest rated cut- Astor Ideal diamonds- tend to have lower rated levels of clarity. Improvements in the type of cut are not always associated with improvements in clarity. 
+
+**CLAIM 8:**
+Blue Nile claims that the most clear diamonds are the most rare. To stand in for rarity, we used price (more rare diamonds are more expensive). We assessed if the relationship between carat and price differed across levels of clarity and found that there is not a difference in rarity across levels of clarity.
+
+**CLAIM 9:**
+Blue Nile claims that “buying shy”, or buying a diamond of a slightly lower carat level so that it does not cross a “barrier number”, can save money. We found support that both .9 carat diamonds versus 1.0 carat diamonds and 1.9 carat diamonds versus 2.0 carat diamonds showed significantly lower prices for the “shy” carat number (.9 and 1.9). Avoiding the round carat numbers can save money.
+
+## **SECTION 2: Data Description & Visualizations**
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(rmarkdown)
+library(knitr)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+```
+```{r, echo=FALSE}
+diamonds <- read.csv("diamonds4.csv", header = TRUE)
+```
+```{r, echo=FALSE}
+clarityCats <- c("VVS2", "VVS1", "VS2", "VS1", "SI2", "SI1", "IF", "FL")
+colorCats <- c("J","I","H","G","F","E","D")
+cutCats <- c("Good", "Very Good", "Ideal", "Astor Ideal")
+```
+```{r, echo=FALSE}
+diamonds <- diamonds%>%
+  mutate(clarity = factor(clarity, levels = clarityCats))%>%
+  mutate(color = factor(color,levels = colorCats))%>%
+  mutate(cut = factor(cut, levels = cutCats))
+```
+
+### **DATASET**
+
+#### `diamonds4.csv`
+
+A data set with information about more than 1,000 different diamonds that are for sale at Blue Nile including: <span style="color:#023e8a">**`carat`**</span>, <span style="color:#023e8a">**`clarity`**</span>, <span style="color:#023e8a">**`color`**</span>, <span style="color:#023e8a">**`cut`**</span>, <span style="color:#023e8a">**`price`**</span>.
+
+### **VARIABLES**
+
+<span style="color:#023e8a"><font size="5">**`carat`**</font></span>  Numerical variable measuring a diamonds' weight. One carat equals 200 mg, or 0.2 grams, of a diamond.
+
+* **Summary Statistics:**
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+summary(diamonds$carat)
+
+p<-ggplot(diamonds, aes(x=carat)) + 
+  geom_histogram(binwidth=.5, colour="#023e8a", fill="#90e0ef")+
+  labs(x='Carat', y='Count',title='Distribution of Carat Weight') + 
+  theme(plot.title = element_text(hjust=0.5, face="bold")) 
+p+ geom_vline(aes(xintercept=mean(carat)),
+              color="#023e8a", linetype="dashed", linewidth=1)
+```
+
+<span style="color:#023e8a"><font size="5">**`clarity`**</font></span>  Categorical variable that assesses small imperfections within a diamond.
+
+* **Grading Scale (highest to lowest):**  <span style="color:#48cae4">FL, IF, SI1, SI2, VS1, VS2, VVS1, VVS2</span>
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+newData_clarity<-diamonds%>%
+  group_by(clarity)%>%
+  dplyr::summarize(count=n())%>%
+  mutate(Percent=count/nrow(diamonds))
+ggplot(newData_clarity, aes(x=clarity, y=Percent))+
+  geom_bar(stat='identity', fill="#023e8a")+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Clarity', y='Clarity Percentage', title='Proportion of Each Clarity')
+```
+
+<span style="color:#023e8a"><font size="5">**`color`**</font></span> Categorical variable that refers to how colorless a diamond is. The less color, the more rare and expensive.
+
+* **Grading Scale (colorless to faint color):** <span style="color:#48cae4">D, E, F, G, H, I, J </span>
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+newData_color<-diamonds%>%
+  group_by(color)%>%
+  dplyr::summarize(count=n())%>%
+  mutate(Percent=count/nrow(diamonds))
+ggplot(newData_color, aes(x=color, y=Percent))+
+  geom_bar(stat='identity', fill='#023e8a')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Color', y='Color Percentage', title='Proportion of Each Color')
+```
+
+<span style="color:#023e8a"><font size="5">**`cut`**</font></span> Categorical variable that measures how well-proportioned a diamond's dimensions are.
+
+* **Grading Scale (highest to lowest):** <span style="color:#48cae4">Astor Idea, Ideal, Very Good, Good</span>
+
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+newData_cut<-diamonds%>%
+  group_by(cut)%>%
+  dplyr::summarize(count=n())%>%
+  mutate(Percent=count/nrow(diamonds))
+ggplot(newData_cut, aes(x=cut, y=Percent))+
+  geom_bar(stat='identity', fill='#023e8a')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut', y='Percent of Each Cut', title='Proportion of Each Cut')
+```
+
+<span style="color:#023e8a"><font size="5">**`price`**</font></span> In USD ($).
+
+* **Summary Statistics:**
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+summary(diamonds$price)
+
+p1<-ggplot(diamonds, aes(x=price)) + 
+  geom_histogram(binwidth = 5000, bins=50, color="#023e8a", fill="#90e0ef")+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Price', y='Count',title='Distribution of Price')
+p1+ geom_vline(aes(xintercept=mean(price)),
+              color="#023e8a", linetype="dashed", linewidth=1)
+```
+
+### **CLAIMS:**
+
+We have summarized 9 claims from Blue Nile and will discuss the validity of each below.
+
+### <span style="color:#023e8a">**CLAIM 1: Higher Cut = Higher Price**</span>
+* Finding the Strength of the Relationship Between Cut and Price:
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+ggplot(diamonds, aes(x=cut, y=price))+
+  geom_boxplot(fill='#023e8a', color='black')+
+  coord_cartesian(ylim = c(0, 15000))+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut', y='Price',title='Cut Versus Price')
+
+ggplot(diamonds, aes(x = cut, y = price)) +
+  geom_jitter(width = 0.3, height = 0.3, color='#023e8a')+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut', y='Price',title='Cut Versus Price')
+```
+
+There is not a very strong association between price and cut. The distributions of price in each cut are similar, excluding extreme outliers, as seen more evidently through the jitter plot.
+
+### <span style="color:#023e8a">**CLAIM 2: Higher Clarity = Higher Price**</span>
+
+* Finding the Strength of the Relationship Between Clarity and Price:
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+ggplot(diamonds, aes(x=clarity, y=price))+
+  geom_boxplot(fill='#023e8a', color='black')+
+  coord_cartesian(ylim = c(0, 20000))+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Clarity', y='Price',title='Clarity Versus Price (with Axis Limit)')
+
+ggplot(diamonds, aes(x=clarity, y=price))+
+  geom_boxplot(fill='#023e8a', color='black')+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Clarity', y='Price',title='Clarity Versus Price (without Axis Limit)')
+
+ggplot(diamonds, aes(x = clarity, y = price)) +
+  geom_jitter(width = 0.3, height = 0.3, color='#023e8a')+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Clarity', y='Price',title='Clarity Versus Price')
+```
+
+There is not a strong association between price and clarity. The distributions of price in each clarity are relatively similar, barring a few outliers in each category. The jitter plot shows this well, as the flawless cateogry has so few data points the box plots are not great representations of the data.
+
+### <span style="color:#023e8a">**CLAIM 3: Colorless = Higher Price**</span>
+* Finding the Strength of the Relationship Between Color and Price
+
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+ggplot(diamonds, aes(x=color, y=price))+
+  geom_boxplot(fill='#023e8a', color='black')+
+  coord_cartesian(ylim = c(0, 15000))+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Color', y='Price', title='Color Versus Price')
+
+ggplot(diamonds, aes(x = color, y = price)) +
+  geom_jitter(width = 0.3, height = 0.3, color='#023e8a')+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Color', y='Price', title='Color Versus Price')
+```
+
+There appears to be a subtle association between price and color. As the color gets more colorless, the price appears to increase slightly, especially when looking at some of the outlier values. The jitter plot shows this more clearly than the box plot.
+
+### <span style="color:#023e8a">**CLAIM 4: Higher Carat = Higher Price**</span>
+```{r, echo=FALSE, message=FALSE, out.width="60%", fig.align='center'}
+ystar <- log(diamonds$price)
+diamonds1<-data.frame(diamonds,ystar)
+
+xstar<-log(diamonds$carat)
+diamonds1<-data.frame(diamonds,xstar)
+
+ggplot(diamonds1, aes(x=xstar,y=ystar))+
+  geom_point(color='#023e8a')+
+  geom_smooth(method = "lm", se=FALSE, color='black')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Log of Carat',y='Log of Price', title='Log of Carat Versus Log of Price')
+```
+
+
+The analysis of this claim is based on the main analysis in the third section. We performed log transformations on the response variable (because of the results of a Box Cox plot) and the predictor (because of the shape of the distribution). Plotting the resulting transformed variables in a scatter plot, we see a clear positive linear relationship between carat and price. 
+
+### <span style="color:#023e8a">**CLAIM 5: Cut Affects Price More Than Clarity**</span>
+
+```{r, echo=FALSE, warning=FALSE, out.width="60%", fig.align='center'}
+ggplot(diamonds, aes(x=cut, y=price, fill = clarity))+
+  geom_boxplot() +
+  ylim(0,10000) +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut', y='Price', title='Cut Versus Price') +
+  scale_fill_manual(values=c("#ade8f4", "#90e0ef", "#48cae4", "#00b4d8", "#0096c7", "#0077b6", "#023e8a", "#03045e"))
+```
+Cut does seem to affect price more than clarity because the boxplots divided by clarity level and clustered by cut show stronger association between cut and price versus clarity and price since the clarity types among the cuts are inconsistent with price levels.
+
+### <span style="color:#023e8a">**CLAIM 6: Relationship Between Color and Cut**</span>
+```{r, echo=FALSE, message=FALSE, out.width="60%", fig.align='center'}
+agg_tbl <- diamonds %>% group_by(color,cut) %>% 
+  summarise(total_count=n())
+corr<-agg_tbl %>% 
+  group_by(color) %>% 
+  mutate(percent = prop.table(total_count))
+         
+ggplot(corr, aes(x=color, y=percent, fill=cut))+
+  geom_bar(stat='identity',position='fill')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x= 'Color', y='Proportion', title="Proportion of Color by Cut") +
+  scale_fill_manual(values=c("#ade8f4", "#48cae4", "#0077b6", "#023e8a"))
+
+```
+
+The data shows that there is not a relationship between color and cut. Given the color, you would expect D, the highest rated color to have the highest percentage of Astor Ideal cut diamonds. That is not the case as the highest proportion is actually in F. There also does not seem to be a noticeable difference in proportion of higher cuts as you move into the more colorless or more desirable color range. This relationship based on the data seems to be false that there is a relationship between color and cut.
+
+### <span style="color:#023e8a">**CLAIM 7: Relationship Between Type of Cut and Clarity**</span>
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+diamonds$cut <- factor(diamonds$cut, levels = c("Good", "Very Good", "Ideal", "Astor Ideal"))
+diamonds$clarity <- factor(diamonds$clarity, levels = c("VVS2", "VVS1", "VS2", "VS1", "SI2", "SI1", "IF", "FL"))
+ggplot(diamonds,aes(x=clarity, fill=cut))+
+  geom_bar(position = "fill") +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut',y='Clarity', title='Proportions of Cut by Clarity') + 
+  scale_fill_manual(values=c("#ade8f4", "#48cae4", "#0077b6", "#023e8a"))
+
+```
+
+The data does not have cut type (e.g., heart), so we compared the available cut variable to clarity. The variable levels appear in lowest quality to highest quality order. The most common cut across clarity levels is Ideal. Surprisingly, Astor Ideal cut, the best cut, appears most in lower categories of clarity and the FL category has more very good cuts than better cuts (like Ideal and Astor Ideal). IF has the largest proportion of Ideal cut. The claim seems to be false in that there is no clear relationship between cut and clarity.
+
+### <span style="color:#023e8a">**CLAIM 8: More Clarity = Rarer**</span>
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+ggplot(diamonds, aes(x=carat,y=price))+
+  geom_point(alpha=0.2, color='#023e8a')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x="Carat", y="Price", title="Price Against Carat by Clarity") +
+  facet_wrap(~clarity)
+```
+
+The relationships between carat and price do not seem to differ across levels of clarity. Thus, the claim that there is a three-way interaction between rarity, carat and price is potentially false. We cannot say for sure because clarity acted as a proxy for rarity here, and there might be another more relevant variable. In addition, the sample size for the highest level of clarity is very small, and we do not have enough data to conclude that the relationship between carat and price there is the same or different.
+
+
+### <span style="color:#023e8a">**CLAIM 9: Buying Shy (Buying Carat Levels Just Below Cutoffs Like 2.0) Saves a Disproportionate Amount of Money**</span>
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+bin1Data<-diamonds%>%
+  filter(diamonds$carat>=1.8 & diamonds$carat<1.9)
+bin2Data<-diamonds%>%
+  filter(diamonds$carat>=1.9 & diamonds$carat<2.0)
+bin3Data<-diamonds%>%
+  filter(diamonds$carat>=2.0 & diamonds$carat<2.1)
+bin4Data<-diamonds%>%
+  filter(diamonds$carat>=2.1 & diamonds$carat<2.2)
+
+ggplot(diamonds, aes(x=carat,y=price))+
+  geom_point()+
+  coord_cartesian(xlim=c(1.8,2.2), ylim=c(5000,40000))+
+  geom_segment(x=1.8, xend=1.9, y = mean(bin1Data$price), yend=mean(bin1Data$price), linetype="solid", color = "#ade8f4", linewidth=1)+
+  geom_segment(x=1.9, xend=2.0, y = mean(bin2Data$price), yend=mean(bin2Data$price), linetype="solid", color = "#48cae4", linewidth=1)+
+  geom_segment(x=2.0, xend=2.1, y = mean(bin3Data$price), yend=mean(bin3Data$price), linetype="solid", color = "#0077b6", linewidth=1)+
+  geom_segment(x=2.1, xend=2.2, y = mean(bin4Data$price), yend=mean(bin4Data$price), linetype="solid", color = "#023e8a", linewidth=1) +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x="Carat", y="Price", title="Price Versus Carat (Axis Limit from 1.8 to 2.2 Carats)")
+```
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+bin1Data2<-diamonds%>%
+  filter(diamonds$carat>=0.8 & diamonds$carat<0.9)
+bin2Data2<-diamonds%>%
+  filter(diamonds$carat>=0.9 & diamonds$carat<1.0)
+bin3Data2<-diamonds%>%
+  filter(diamonds$carat>=1.0 & diamonds$carat<1.1)
+bin4Data2<-diamonds%>%
+  filter(diamonds$carat>=1.1 & diamonds$carat<1.2)
+
+ggplot(diamonds, aes(x=carat,y=price))+
+  geom_point()+
+  coord_cartesian(xlim=c(0.8,1.2), ylim=c(0,20000))+
+  geom_segment(x=0.8, xend=0.9, y = mean(bin1Data2$price), yend=mean(bin1Data2$price), linetype="solid", color = "#ade8f4", linewidth=1)+
+  geom_segment(x=0.9, xend=1.0, y = mean(bin2Data2$price), yend=mean(bin2Data2$price), linetype="solid", color = "#48cae4", linewidth=1)+
+  geom_segment(x=1.0, xend=1.1, y = mean(bin3Data2$price), yend=mean(bin3Data2$price), linetype="solid", color = "#0077b6", linewidth=1)+
+  geom_segment(x=1.1, xend=1.2, y = mean(bin4Data2$price), yend=mean(bin4Data2$price), linetype="solid", color = "#023e8a", linewidth=1) +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x="Carat", y="Price", title="Price Versus Carat (Axis Limit from 0.8 to 1.2 Carats)")
+```
+
+To visualize the "buying shy" phenomenon at low carat values, we made two graphs. One is at the 1.0 carat threshold, and the other is at the 2.0 carat threshold. We then created bins of .1 carat values and plotted the means across the carat values of these means. Using these "steps of means" we can see that the jump in means from the [1.9,2) to [2,2.9) bins is much larger than non border jumps in means. This would support the idea that buying shy is a worthwhile pursuit, as going for a 1.9 carat diamond can be a much better deal than a 2.0 carat diamond. This phenomenon was not possible to visualize at larger carat values because of more spread out data and fewer data points.
+
+The data supports the assumption that buying 1.9 carats versus 2.0 carats gives you a better deal, as you save roughly 10% on price for a 0.1 decrease in carats. However, given that carat and price are log transformed, this stands true for smaller carats only. As the carats increase, the percent change and price difference decrease. The difference between the price value of 9.9 carats and 10 carats is very marginal.
+
+## **SECTION 3: Regression of Price Against Carat & Conclusions**
+
+<span style="color:#023e8a"><span style="color:#023e8a">Fit an appropriate simple linear regression for price against carat.</span></span>
+
+* Assumption 1: Errors have mean 0. The relationship is approximately linear.
+* Assumption 2: Errors have constant variance
+* Assumption 3: Errors are independent
+* Assumption 4: Errors are normally distributed
+
+Blue Nile claims that there is a positive relationship between price and carat. This analysis is meant to test that hypothesis. First, we plotted a scatterplot of price against carat to see if assumptions 1 and 2 were violated.
+
+```{r, echo=FALSE, message=FALSE, out.width="60%", fig.align='center'}
+ggplot(diamonds, aes(x=carat,y=price))+
+geom_point(color='#023e8a')+
+geom_smooth(method = "lm", se=FALSE, color="black")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Carat',y='Price', title='Price Against Carat')
+```
+
+It seems as though the points are not scattered evenly about the regression line, so we tentatively say that assumption 1 is violated. In addition, the vertical distance to the points from the regression line does not seem to be constant, so we tentatively say that assumption 2 is violated.
+
+To double-check that assumptions are being violated, we took a second look at the data in the residual plots.
+
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+result<-lm(price~carat, data=diamonds)
+plot(result)
+```
+
+In the "Residuals vs Fitted" graph, the line does not have curvature, so assumption 1 is not violated. The vertical spread of the residuals is not constant, so assumption 2 is violated. This can also be seen in the Scale-Location graph. In the Q-Q plot, the residuals mostly fall along the line, though we believe a follow-up is necessary. Hence, we ran a Shapiro-Wilk test.
+
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+shapiro.test(result$residuals)
+```
+
+The Shapiro-Wilk is significant, entailing we reject the null that the residuals are normally distributed.
+
+Because assumptions 2 is violated, we ran a a Box Cox plot to see how the variables should be transformed. Assumption 4 is also violated, but we will perform the transformations on the response (and potentially the predictor) variable and see if this resolves the non-normality issue.
+
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+MASS::boxcox(result, lambda = seq(.2, 0.4, 1/20))
+```
+
+The relevant interval of the Box Cox plot contains 0.3, so we choose this for our transformation exponent. We plotted a scatterplot of the transformed price variable against carat and a residuals plot to test if the assumption violations were resolved.
+
+```{r, echo=FALSE, message=FALSE, out.width="60%", fig.align='center'}
+pricestar <- (diamonds$price)^.3
+ggplot(diamonds, aes(x=carat,y=pricestar))+
+geom_point(color="#023e8a")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+geom_smooth(method = "lm", se=FALSE, color="black")+
+labs(x="Carat", y="Price^.3", title="Price Against Carat")
+```
+
+From the scatterplot, it seemed like the violation of assumption 2 has not been resolved. This suggests that we need a $\lambda$ further away from 1. We tried the more extreme value of 0.2.
+
+```{r, echo=FALSE, message=FALSE, out.width="60%", fig.align='center'}
+pricestar <- (diamonds$price)^.2
+ggplot(diamonds, aes(x=carat,y=pricestar))+
+geom_point(color="#023e8a")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+geom_smooth(method = "lm", se=FALSE, color="black")+
+labs(x="Carat", y="Price^.2", title="Price Against Carat")
+```
+
+This graph is closer to fulfilling assumption 2, but it is still not consistent with the assumption. Next we try the more extreme value, 0.1.
+
+```{r, echo=FALSE, message=FALSE, out.width="60%", fig.align='center'}
+pricestar.1 <- (diamonds$price)^.1
+ggplot(diamonds, aes(x=carat,y=pricestar.1))+
+geom_point(color="#023e8a")+
+geom_smooth(method = "lm", se=FALSE, color="black")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+labs(x="Carat", y="Price^.1", title="Price Against Carat")
+```
+
+This is closer, but it could be better. Next we try log, a more extreme value.
+
+```{r, echo=FALSE, message=FALSE, out.width="60%", fig.align='center'}
+pricestarlog <- log(diamonds$price)
+ggplot(diamonds, aes(x=carat,y=pricestarlog))+
+geom_point(color="#023e8a")+
+geom_smooth(method = "lm", se=FALSE, color="black")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+labs(x="Carat", y="Log of Price", title="Log of Price Against Log of Carat")
+```
+
+Next we check the residual plots for $\lambda = .1$ and log.
+
+```{r, echo=FALSE, out.width="45%", fig.align='center'}
+resultstar<-lm(pricestar.1~carat, data=diamonds)
+par(mfrow=c(2,2))
+plot(resultstar)
+```
+```{r, echo=FALSE, out.width="45%", fig.align='center'}
+resultstar<-lm(pricestarlog~carat, data=diamonds)
+par(mfrow=c(2,2))
+plot(resultstar)
+```
+
+The log transformation seems to best fulfill assumption 2, and it is the most easily interpretable transformation. Thus, we choose the log transformation for the response variable. 
+
+The log transformation resulted in a violation of assumption 1, requiring a transformation of the predictor variable. The shape of the graph seems to fit an logistic relationship, so we did an logistic transformation on the predictor, and plot the scatter plot of log price against log carat and a residual plot.
+
+```{r, echo=FALSE, message=FALSE, out.width="60%", fig.align='center'}
+caratstar <- log(diamonds$carat)
+ggplot(diamonds, aes(x=caratstar,y=pricestarlog))+
+geom_point(color="#023e8a")+
+geom_smooth(method = "lm", se=FALSE, color="black")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+labs(x="Log of Carat", y="Log of Price", title="Log of Price Against Log of Carat")
+```
+
+```{r, echo=FALSE, out.width="45%", fig.align='center'}
+resultstar<-lm(pricestarlog~caratstar, data=diamonds)
+par(mfrow=c(2,2))
+plot(resultstar)
+```
+
+The assumptions 1, 2, and 4 hold for the majority of the data (y > 7). For assumption 3, that the data points are independent, presumably each sale is independent of each other scale. Hence, all assumptions are met.
+
+```{r, echo=FALSE, out.width="60%", fig.align='center'}
+summary(resultstar)
+```
+
+A linear regression was run in which carat predicted price of diamonds with a null hypothesis that $\beta_{1} = 0$ and an alternative hypothesis that $\beta_{0} \neq 0$. For a 1% increase in carat, the price is multiplied by 1.039. In other words, price increases with an increase in carat. This is a significant result (F = 1.4X10^4, p < .001), meaning the relationship between carat and price is significantly positive. $R^2 = .92$ which means 92% of the variance in price is explained by carat, a very large proportion. It fulfills the following equation:
+
+`Price* = 8.52 + 1.94 x Carat*` where `Price* = log(Price)` and `Carat* = log(Carat)`.
+
+Therefore, the claim made on the Blue Nile website is true: price is positively related to carat.
+
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
+

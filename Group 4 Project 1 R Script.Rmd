@@ -1,0 +1,372 @@
+---
+title: "**PROJECT 1 R SCRIPT**"
+author: "GROUP 4: Stephanie Fissel, Jack Gallagher, Lindley Slipetz, & Will Tenpas"
+date: "July 2, 2023"
+output: 
+    html_document:
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        theme: yeti
+---
+
+## **SECTION 2: Data Description & Visualizations**
+
+### **WORKSPACE PREP**
+
+#### Load packages
+
+```{r, echo=TRUE}
+library(rmarkdown)
+library(knitr)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+```
+#### Read in data
+* `diamonds4.csv`
+```{r}
+diamonds <- read.csv("diamonds4.csv", header = TRUE)
+head(diamonds)
+```
+#### Creating Factor Levels for Categorical Variables
+```{r}
+clarityCats <- c("VVS2", "VVS1", "VS2", "VS1", "SI2", "SI1", "IF", "FL")
+colorCats <- c("J","I","H","G","F","E","D")
+cutCats <- c("Good", "Very Good", "Ideal", "Astor Ideal")
+```
+
+#### Refactoring the New Ordered Categories
+```{r}
+diamonds <- diamonds%>%
+  mutate(clarity = factor(clarity, levels = clarityCats))%>%
+  mutate(color = factor(color,levels = colorCats))%>%
+  mutate(cut = factor(cut, levels = cutCats))
+```
+
+### **DATASET VARIABLES**
+
+<span style="color:#023e8a"><font size="5">**`carat`**</font></span>
+
+* **Summary Statistics:**
+```{r}
+summary(diamonds$carat)
+
+p<-ggplot(diamonds, aes(x=carat)) + 
+  geom_histogram(binwidth=.5, colour="black", fill="white")+
+  labs(x='Carat', y='Count',title='Distribution of Carat Weight') + 
+  theme(plot.title = element_text(hjust=0.5, face="bold")) 
+p+ geom_vline(aes(xintercept=mean(carat)),
+              color="#023e8a", linetype="dashed", linewidth=1)
+```
+
+<span style="color:#023e8a"><font size="5">**`clarity`**</font></span>
+```{r}
+newData_clarity<-diamonds%>%
+  group_by(clarity)%>%
+  dplyr::summarize(count=n())%>%
+  mutate(Percent=count/nrow(diamonds))
+ggplot(newData_clarity, aes(x=clarity, y=Percent))+
+  geom_bar(stat='identity', fill="#023e8a")+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Clarity', y='Clarity Percentage', title='Proportion of Each Clarity')
+```
+
+<span style="color:#023e8a"><font size="5">**`color`**</font></span>
+```{r}
+newData_color<-diamonds%>%
+  group_by(color)%>%
+  dplyr::summarize(count=n())%>%
+  mutate(Percent=count/nrow(diamonds))
+ggplot(newData_color, aes(x=color, y=Percent))+
+  geom_bar(stat='identity', fill='#023e8a')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Color', y='Color Percentage', title='Proportion of Each Color')
+```
+
+<span style="color:#023e8a"><font size="5">**`cut`**</font></span>
+```{r}
+newData_cut<-diamonds%>%
+  group_by(cut)%>%
+  dplyr::summarize(count=n())%>%
+  mutate(Percent=count/nrow(diamonds))
+ggplot(newData_cut, aes(x=cut, y=Percent))+
+  geom_bar(stat='identity', fill='#023e8a')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut', y='Percent of Each Cut', title='Proportion of Each Cut')
+```
+
+<span style="color:#023e8a"><font size="5">**`price`**</font></span>
+```{r}
+summary(diamonds$price)
+
+p1<-ggplot(diamonds, aes(x=price)) + 
+  geom_histogram(binwidth = 5000, bins=50, color="black", fill="white")+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Price', y='Count',title='Distribution of Price')
+p1+ geom_vline(aes(xintercept=mean(price)),
+              color="#023e8a", linetype="dashed", linewidth=1)
+```
+
+### **CLAIMS:**
+
+### <span style="color:#023e8a">**CLAIM 1: Higher Cut = Higher Price**</span>
+* Finding the Strength of the Relationship Between Cut and Price:
+```{r}
+ggplot(diamonds, aes(x=cut, y=price))+
+  geom_boxplot(fill='#023e8a', color='black')+
+  coord_cartesian(ylim = c(0, 15000))+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut', y='Price',title='Cut Versus Price')
+
+ggplot(diamonds, aes(x = cut, y = price)) +
+  geom_jitter(width = 0.3, height = 0.3, color='#023e8a')+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut', y='Price',title='Cut Versus Price')
+```
+
+### <span style="color:#023e8a">**CLAIM 2: Higher Clarity = Higher Price**</span>
+
+* Finding the Strength of the Relationship Between Clarity and Price:
+```{r}
+ggplot(diamonds, aes(x=clarity, y=price))+
+  geom_boxplot(fill='#023e8a', color='black')+
+  coord_cartesian(ylim = c(0, 20000))+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Clarity', y='Price',title='Clarity Versus Price (with Axis Limit)')
+
+ggplot(diamonds, aes(x=clarity, y=price))+
+  geom_boxplot(fill='#023e8a', color='black')+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Clarity', y='Price',title='Clarity Versus Price (without Axis Limit)')
+
+ggplot(diamonds, aes(x = clarity, y = price)) +
+  geom_jitter(width = 0.3, height = 0.3, color='#023e8a')+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Clarity', y='Price',title='Clarity Versus Price')
+```
+
+### <span style="color:#023e8a">**CLAIM 3: Colorless = Higher Price**</span>
+* Finding the Strength of the Relationship Between Color and Price
+```{r}
+ggplot(diamonds, aes(x=color, y=price))+
+  geom_boxplot(fill='#023e8a', color='black')+
+  coord_cartesian(ylim = c(0, 15000))+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Color', y='Price', title='Color Versus Price')
+
+ggplot(diamonds, aes(x = color, y = price)) +
+  geom_jitter(width = 0.3, height = 0.3, color='#023e8a')+
+  theme_minimal() +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Color', y='Price', title='Color Versus Price')
+```
+
+### <span style="color:#023e8a">**CLAIM 4: Higher Carat = Higher Price**</span>
+```{r}
+ystar <- log(diamonds$price)
+diamonds1<-data.frame(diamonds,ystar)
+
+xstar<-log(diamonds$carat)
+diamonds1<-data.frame(diamonds,xstar)
+
+ggplot(diamonds1, aes(x=xstar,y=ystar))+
+  geom_point(color='#023e8a')+
+  geom_smooth(method = "lm", se=FALSE, color='black')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Log of Carat',y='Log of Price', title='Log of Carat Versus Log of Price')
+```
+
+### <span style="color:#023e8a">**CLAIM 5: Cut Affects Price More Than Clarity**</span>
+
+```{r}
+ggplot(diamonds, aes(x=cut, y=price, fill = clarity))+
+  geom_boxplot() +
+  ylim(0,10000) +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut', y='Price', title='Cut Versus Price') +
+  scale_fill_manual(values=c("#ade8f4", "#90e0ef", "#48cae4", "#00b4d8", "#0096c7", "#0077b6", "#023e8a", "#03045e"))
+```
+
+### <span style="color:#023e8a">**CLAIM 6: Relationship Between Color and Cut**</span>
+```{r}
+agg_tbl <- diamonds %>% group_by(color,cut) %>% 
+  summarise(total_count=n())
+corr<-agg_tbl %>% 
+  group_by(color) %>% 
+  mutate(percent = prop.table(total_count))
+         
+ggplot(corr, aes(x=color, y=percent, fill=cut))+
+  geom_bar(stat='identity',position='fill')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x= 'Color', y='Proportion', title="Proportion of Color by Cut") +
+  scale_fill_manual(values=c("#ade8f4", "#48cae4", "#0077b6", "#023e8a"))
+
+```
+
+### <span style="color:#023e8a">**CLAIM 7: Relationship Between Type of Cut and Clarity**</span>
+```{r}
+diamonds$cut <- factor(diamonds$cut, levels = c("Good", "Very Good", "Ideal", "Astor Ideal"))
+diamonds$clarity <- factor(diamonds$clarity, levels = c("VVS2", "VVS1", "VS2", "VS1", "SI2", "SI1", "IF", "FL"))
+ggplot(diamonds,aes(x=clarity, fill=cut))+
+  geom_bar(position = "fill") +
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Cut',y='Clarity', title='Proportions of Cut by Clarity') + 
+  scale_fill_manual(values=c("#ade8f4", "#48cae4", "#0077b6", "#023e8a"))
+
+```
+
+### <span style="color:#023e8a">**CLAIM 8: More Clarity = Rarer**</span>
+```{r}
+ggplot(diamonds, aes(x=carat,y=price))+
+  geom_point(alpha=0.2, color='#023e8a')+
+  theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x="Carat", y="Price", title="Price Against Carat by Clarity") +
+  facet_wrap(~clarity)
+```
+
+### <span style="color:#023e8a">**CLAIM 9: Buying Shy (Buying Carat Levels Just Below Cutoffs Like 2.0) Saves a Disproportionate Amount of Money**</span>
+```{r}
+bin1Data<-diamonds%>%
+  filter(diamonds$carat>=1.8 & diamonds$carat<1.9)
+bin2Data<-diamonds%>%
+  filter(diamonds$carat>=1.9 & diamonds$carat<2.0)
+bin3Data<-diamonds%>%
+  filter(diamonds$carat>=2.0 & diamonds$carat<2.1)
+bin4Data<-diamonds%>%
+  filter(diamonds$carat>=2.1 & diamonds$carat<2.2)
+
+ggplot(diamonds, aes(x=carat,y=price))+
+  geom_point()+
+  coord_cartesian(xlim=c(1.8,2.2), ylim=c(5000,40000))+
+  geom_segment(x=1.8, xend=1.9, y = mean(bin1Data$price), yend=mean(bin1Data$price), linetype="solid", color = "#ade8f4", linewidth=1)+
+  geom_segment(x=1.9, xend=2.0, y = mean(bin2Data$price), yend=mean(bin2Data$price), linetype="solid", color = "#48cae4", linewidth=1)+
+  geom_segment(x=2.0, xend=2.1, y = mean(bin3Data$price), yend=mean(bin3Data$price), linetype="solid", color = "#0077b6", linewidth=1)+
+  geom_segment(x=2.1, xend=2.2, y = mean(bin4Data$price), yend=mean(bin4Data$price), linetype="solid", color = "#023e8a", linewidth=1)
+```
+
+```{r}
+bin1Data2<-diamonds%>%
+  filter(diamonds$carat>=0.8 & diamonds$carat<0.9)
+bin2Data2<-diamonds%>%
+  filter(diamonds$carat>=0.9 & diamonds$carat<1.0)
+bin3Data2<-diamonds%>%
+  filter(diamonds$carat>=1.0 & diamonds$carat<1.1)
+bin4Data2<-diamonds%>%
+  filter(diamonds$carat>=1.1 & diamonds$carat<1.2)
+
+ggplot(diamonds, aes(x=carat,y=price))+
+  geom_point()+
+  coord_cartesian(xlim=c(0.8,1.2), ylim=c(0,20000))+
+  geom_segment(x=0.8, xend=0.9, y = mean(bin1Data2$price), yend=mean(bin1Data2$price), linetype="solid", color = "#ade8f4", linewidth=1)+
+  geom_segment(x=0.9, xend=1.0, y = mean(bin2Data2$price), yend=mean(bin2Data2$price), linetype="solid", color = "#48cae4", linewidth=1)+
+  geom_segment(x=1.0, xend=1.1, y = mean(bin3Data2$price), yend=mean(bin3Data2$price), linetype="solid", color = "#0077b6", linewidth=1)+
+  geom_segment(x=1.1, xend=1.2, y = mean(bin4Data2$price), yend=mean(bin4Data2$price), linetype="solid", color = "#023e8a", linewidth=1)
+```
+
+## **SECTION 3: Regression of Price Against Carat & Conclusions**
+
+Plotted a scatterplot of price against carat to see if assumptions 1 and 2 were violated:
+```{r}
+ggplot(diamonds, aes(x=carat,y=price))+
+geom_point(color='#023e8a')+
+geom_smooth(method = "lm", se=FALSE, color="black")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+  labs(x='Carat',y='Price', title='Price Against Carat')
+```
+
+Took a second look at the data in the residual plots:
+```{r}
+result<-lm(price~carat, data=diamonds)
+plot(result)
+```
+
+Ran a Shapiro-Wilk test:
+```{r}
+shapiro.test(result$residuals)
+```
+
+Perform transformations on response (and potentially the predictor) variable and see if this resolves the non-normality issue:
+```{r}
+MASS::boxcox(result, lambda = seq(.2, 0.4, 1/20))
+```
+
+Plotted scatterplot of transformed price variable against carat and a residuals plot to test if the assumption violations were resolved:
+```{r}
+pricestar <- (diamonds$price)^.3
+ggplot(diamonds, aes(x=carat,y=pricestar))+
+geom_point(color="#023e8a")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+geom_smooth(method = "lm", se=FALSE, color="black")+
+labs(x="Carat", y="Price^.3", title="Price Against Carat")
+```
+
+Tried the more extreme value of 0.2:
+```{r}
+pricestar <- (diamonds$price)^.2
+ggplot(diamonds, aes(x=carat,y=pricestar))+
+geom_point(color="#023e8a")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+geom_smooth(method = "lm", se=FALSE, color="black")+
+labs(x="Carat", y="Price^.2", title="Price Against Carat")
+```
+
+Try the more extreme value, 0.1:
+```{r}
+pricestar.1 <- (diamonds$price)^.1
+ggplot(diamonds, aes(x=carat,y=pricestar.1))+
+geom_point(color="#023e8a")+
+geom_smooth(method = "lm", se=FALSE, color="black")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+labs(x="Carat", y="Price^.1", title="Price Against Carat")
+```
+
+Try log, a more extreme value:
+```{r}
+pricestarlog <- log(diamonds$price)
+ggplot(diamonds, aes(x=carat,y=pricestarlog))+
+geom_point(color="#023e8a")+
+geom_smooth(method = "lm", se=FALSE, color="black")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+labs(x="Carat", y="Log of Price", title="Log of Price Against Log of Carat")
+```
+
+Check the residual plots for $\lambda = .1$ and log:
+```{r}
+resultstar<-lm(pricestar.1~carat, data=diamonds)
+par(mfrow=c(2,2))
+plot(resultstar)
+```
+```{r}
+resultstar<-lm(pricestarlog~carat, data=diamonds)
+par(mfrow=c(2,2))
+plot(resultstar)
+```
+
+Did a logistic transformation on the predictor, and plotted scatterplot of log price against log carat and a residual plot:
+```{r}
+caratstar <- log(diamonds$carat)
+ggplot(diamonds, aes(x=caratstar,y=pricestarlog))+
+geom_point(color="#023e8a")+
+geom_smooth(method = "lm", se=FALSE, color="black")+
+theme(plot.title = element_text(hjust=0.5, face="bold")) +
+labs(x="Log of Carat", y="Log of Price", title="Log of Price Against Log of Carat")
+```
+
+```{r}
+resultstar<-lm(pricestarlog~caratstar, data=diamonds)
+par(mfrow=c(2,2))
+plot(resultstar)
+```
+
+All assumptions are met:
+```{r}
+summary(resultstar)
+```
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
