@@ -3,7 +3,7 @@
 #### July 2, 2023
 
 ## Data
-### Dataset:
+### Dataset: `diamonds4.csv`
 Contains information on over 1,000 diamonds, including carat, clarity, color, cut, and price.
 
 ### Variables:
