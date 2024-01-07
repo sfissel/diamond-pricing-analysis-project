@@ -19,7 +19,7 @@ When purchasing diamonds, consumers often consider various factors such as cut, 
 ### Claims and Results
 <b>1. Cut Importance:</b> Blue Nile claims that cut is a crucial factor in determining diamond prices. Our analysis suggests a slight increase in price with improved cut, but cut is not as influential as claimed.
 
-<b>2.Clarity Impact:</b> Blue Nile suggests that better clarity leads to higher prices. Our findings indicate no clear association between clarity and price, except for flawless clarity, which lacks sufficient data for a robust analysis.
+<b>2. Clarity Impact:</b> Blue Nile suggests that better clarity leads to higher prices. Our findings indicate no clear association between clarity and price, except for flawless clarity, which lacks sufficient data for a robust analysis.
 
 <b>3. Color Influence:</b> Blue Nile asserts that colorlessness increases diamond prices. While more colorless diamonds show a slight price increase, it is not strong enough to support Blue Nile's claim.
 
@@ -47,5 +47,5 @@ For further details, refer to the comprehensive analysis provided in the R Markd
 Blue Nile's claim that price is positively related to carat is supported by our analysis.
 
 ##
-For a detailed analysis and visualizations, please refer to the R Markdown code script and report in this repository.
+<em> For a detailed analysis and visualizations, please refer to the R Markdown code script and report in this repository.</em>
 
